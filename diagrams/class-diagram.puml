@@ -1,0 +1,280 @@
+@startuml
+title Class diagram tong quan - He thong quan ly trung tam hoc them
+
+' Ban tong quan uu tien bo cuc ro rang.
+' Cac file chi tiet nam trong diagrams/class-diagrams/.
+
+left to right direction
+hide circle
+hide empty methods
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam nodesep 70
+skinparam ranksep 90
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #374151
+  ArrowColor #4B5563
+}
+
+package "Tai khoan va ho so" as ACCOUNT {
+  class User {
+    +id: String
+    +username: String
+    +fullName: String
+    +role: Role
+    +status: UserStatus
+  }
+
+  class StudentProfile {
+    +id: String
+    +studentCode: String
+    +dateOfBirth: DateTime?
+    +school: String?
+  }
+
+  class TeacherProfile {
+    +id: String
+    +teacherCode: String
+    +specialization: String?
+    +qualification: String?
+  }
+
+  class StaffProfile {
+    +id: String
+    +staffCode: String
+    +position: String?
+  }
+
+  class Parent {
+    +id: String
+    +fullName: String
+    +phone: String
+    +relationship: String
+  }
+
+  class Notification {
+    +id: String
+    +title: String
+    +createdAt: DateTime
+    +isRead: Boolean
+  }
+}
+
+package "Dao tao" as ACADEMIC {
+  class Subject {
+    +id: String
+    +name: String
+  }
+
+  class Course {
+    +id: String
+    +name: String
+    +grade: Int
+    +tuitionFee: Decimal
+    +numberOfSessions: Int
+  }
+
+  class ClassRoom {
+    +id: String
+    +name: String
+    +maxStudents: Int
+    +currentStudents: Int
+    +status: ClassStatus
+  }
+
+  class Room {
+    +id: String
+    +name: String
+    +capacity: Int
+    +location: String?
+  }
+
+  class ClassRoomRoom <<join>> {
+    +classRoomId: String
+    +roomId: String
+    +assignedAt: DateTime
+  }
+
+  class Schedule {
+    +id: String
+    +dayOfWeek: Int
+    +startTime: String
+    +endTime: String
+  }
+
+  class StudySession {
+    +id: String
+    +sessionDate: DateTime
+    +topic: String?
+    +status: SessionStatus
+  }
+}
+
+package "Van hanh lop va danh gia" as OPERATION {
+  class Enrollment {
+    +id: String
+    +enrollDate: DateTime
+    +status: EnrollmentStatus
+  }
+
+  class TeachingAssignment {
+    +id: String
+    +assignedDate: DateTime
+    +role: String?
+  }
+
+  class Attendance {
+    +id: String
+    +attendanceDate: DateTime
+  }
+
+  class AttendanceDetail {
+    +id: String
+    +status: AttendanceStatus
+    +note: String?
+  }
+
+  class Exam {
+    +id: String
+    +name: String
+    +examDate: DateTime
+    +maxScore: Decimal
+  }
+
+  class Score {
+    +id: String
+    +value: Decimal
+    +comment: String?
+  }
+}
+
+package "Hoc phi va hoa don" as FINANCE {
+  class TuitionPayment {
+    +id: String
+    +amountDue: Decimal
+    +amountPaid: Decimal
+    +dueDate: DateTime
+    +status: TuitionStatus
+  }
+
+  class Payment {
+    +id: String
+    +paymentDate: DateTime
+    +amount: Decimal
+    +method: PaymentMethod
+  }
+
+  class Invoice {
+    +id: String
+    +invoiceDate: DateTime
+    +totalAmount: Decimal
+  }
+}
+
+package "Enum chinh" as ENUMS {
+  enum Role {
+    ADMIN
+    STAFF
+    TEACHER
+    STUDENT
+  }
+
+  enum UserStatus {
+    ACTIVE
+    INACTIVE
+    LOCKED
+  }
+
+  enum ClassStatus {
+    NOT_OPENED
+    ENROLLING
+    ACTIVE
+    POSTPONED
+    FINISHED
+    CANCELLED
+  }
+
+  enum EnrollmentStatus {
+    ACTIVE
+    CANCELLED
+    COMPLETED
+  }
+
+  enum AttendanceStatus {
+    PRESENT
+    ABSENT
+    LATE
+  }
+
+  enum TuitionStatus {
+    UNPAID
+    PARTIAL
+    PAID
+    OVERDUE
+  }
+
+  enum PaymentMethod {
+    CASH
+    BANK_TRANSFER
+    CARD
+  }
+
+  enum SessionStatus {
+    SCHEDULED
+    COMPLETED
+    CANCELLED
+  }
+}
+
+' Hints for stable package placement.
+ACCOUNT -[hidden]right- ACADEMIC
+ACADEMIC -[hidden]right- OPERATION
+OPERATION -[hidden]right- FINANCE
+FINANCE -[hidden]down- ENUMS
+
+' Tai khoan va ho so
+User "1" -- "0..1" StudentProfile
+User "1" -- "0..1" TeacherProfile
+User "1" -- "0..1" StaffProfile
+User "1" -- "0..*" Notification
+StudentProfile "1" -- "0..*" Parent
+
+' Dao tao
+Subject "1" -- "0..*" Course
+Course "1" -- "0..*" ClassRoom
+ClassRoom "1" -- "0..*" ClassRoomRoom
+Room "1" -- "0..*" ClassRoomRoom
+ClassRoom "1" -- "0..*" Schedule
+Room "1" -- "0..*" Schedule
+ClassRoom "1" -- "0..*" StudySession
+
+' Van hanh lop va danh gia
+StudentProfile "1" -- "0..*" Enrollment
+ClassRoom "1" -- "0..*" Enrollment
+TeacherProfile "1" -- "0..*" TeachingAssignment
+ClassRoom "1" -- "0..*" TeachingAssignment
+StudySession "1" -- "0..1" Attendance
+User "1" -- "0..*" Attendance : teacher
+Attendance "1" -- "0..*" AttendanceDetail
+StudentProfile "1" -- "0..*" AttendanceDetail
+ClassRoom "1" -- "0..*" Exam
+Exam "1" -- "0..*" Score
+StudentProfile "1" -- "0..*" Score
+
+' Hoc phi va hoa don
+StudentProfile "1" -- "0..*" TuitionPayment
+Enrollment "1" -- "0..1" TuitionPayment
+TuitionPayment "1" -- "0..*" Payment
+TuitionPayment "1" -- "0..*" Invoice
+Payment "1" -- "0..1" Invoice
+
+legend bottom
+  Source: backend/prisma/schema.prisma.
+  <<join>> la bang lien ket nhieu-nhieu.
+  Cac enum duoc gom rieng de tranh duong noi bi roi.
+endlegend
+
+@enduml

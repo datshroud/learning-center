@@ -1,0 +1,98 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Quản trị viên" as Admin
+actor "Nhân viên trung tâm" as Staff
+actor "Giáo viên" as Teacher
+actor "Học viên" as Student
+
+rectangle "Hệ thống quản lý trung tâm học thêm" {
+  usecase "Đăng nhập" as UC_Login
+  usecase "Quản lý tài khoản" as UC_User
+  usecase "Quản lý Leads tư vấn" as UC_Lead
+  usecase "Quản lý học viên" as UC_Student
+  usecase "Quản lý giáo viên" as UC_Teacher
+  usecase "Quản lý nhân viên" as UC_Staff
+  usecase "Quản lý khóa học" as UC_Course
+  usecase "Tạo lớp học" as UC_Class
+  usecase "Ghi danh học viên vào lớp" as UC_Enrollment
+  usecase "Cập nhật trạng thái ghi danh" as UC_EnrollmentStatus
+  usecase "Phân công giáo viên" as UC_Assignment
+  usecase "Quản lý phòng học" as UC_Room
+  usecase "Tạo lịch học" as UC_Schedule
+  usecase "Tạo buổi học" as UC_StudySession
+  usecase "Điểm danh học viên" as UC_Attendance
+  usecase "Tạo bài kiểm tra" as UC_Exam
+  usecase "Nhập điểm kiểm tra" as UC_Score
+  usecase "Thu học phí" as UC_Tuition
+  usecase "Xem phiếu thu" as UC_Invoice
+  usecase "Xem báo cáo thống kê" as UC_Report
+  usecase "Xuất báo cáo CSV" as UC_ExportReport
+  usecase "Xem lịch học" as UC_ViewSchedule
+  usecase "Xem điểm" as UC_ViewScore
+  usecase "Xem tình trạng học phí" as UC_ViewTuition
+  usecase "Xem khóa học cá nhân" as UC_ViewCourse
+  usecase "Xem thông báo" as UC_Notification
+}
+
+Admin --> UC_Login
+Admin --> UC_User
+Admin --> UC_Lead
+Admin --> UC_Teacher
+Admin --> UC_Staff
+Admin --> UC_Course
+Admin --> UC_Class
+Admin --> UC_Room
+Admin --> UC_Schedule
+Admin --> UC_Tuition
+Admin --> UC_Invoice
+Admin --> UC_Report
+Admin --> UC_ExportReport
+
+Staff --> UC_Login
+Staff --> UC_Lead
+Staff --> UC_Student
+Staff --> UC_Class
+Staff --> UC_Enrollment
+Staff --> UC_EnrollmentStatus
+Staff --> UC_Assignment
+Staff --> UC_Room
+Staff --> UC_Schedule
+Staff --> UC_StudySession
+Staff --> UC_Tuition
+Staff --> UC_Invoice
+Staff --> UC_Report
+Staff --> UC_ExportReport
+Staff --> UC_ViewSchedule
+
+Teacher --> UC_Login
+Teacher --> UC_ViewSchedule
+Teacher --> UC_Attendance
+Teacher --> UC_Exam
+Teacher --> UC_Score
+Teacher --> UC_Notification
+
+Student --> UC_Login
+Student --> UC_ViewCourse
+Student --> UC_ViewSchedule
+Student --> UC_ViewScore
+Student --> UC_ViewTuition
+Student --> UC_Invoice
+Student --> UC_Notification
+
+UC_Enrollment ..> UC_Student : <<include>>
+UC_Enrollment ..> UC_Class : <<include>>
+UC_EnrollmentStatus ..> UC_Enrollment : <<extend>>
+UC_Assignment ..> UC_Teacher : <<include>>
+UC_Schedule ..> UC_Room : <<include>>
+UC_StudySession ..> UC_Class : <<include>>
+UC_Attendance ..> UC_StudySession : <<include>>
+UC_Score ..> UC_Exam : <<include>>
+UC_Tuition ..> UC_Student : <<include>>
+UC_Invoice ..> UC_Tuition : <<include>>
+UC_Report ..> UC_Tuition : <<include>>
+UC_Report ..> UC_Score : <<include>>
+UC_ExportReport ..> UC_Report : <<extend>>
+
+@enduml

@@ -1,0 +1,12 @@
+@startuml
+[*] --> "Chưa mở"
+"Chưa mở" --> "Đang tuyển sinh" : mở đăng ký
+"Đang tuyển sinh" --> "Đang học" : đủ điều kiện mở lớp
+"Đang tuyển sinh" --> "Đã hủy" : hủy lớp
+"Đang học" --> "Tạm hoãn" : tạm dừng
+"Tạm hoãn" --> "Đang học" : tiếp tục
+"Đang học" --> "Đã kết thúc" : hoàn thành khóa học
+"Đã hủy" --> [*]
+"Đã kết thúc" --> [*]
+@enduml
+

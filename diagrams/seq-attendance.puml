@@ -1,0 +1,45 @@
+@startuml
+actor "Giáo viên" as Teacher
+boundary "AttendanceUI" as UI
+control "AttendanceController" as Controller
+entity "StudySession" as StudySession
+entity "ClassRoom" as ClassRoom
+entity "StudentProfile" as Student
+entity "Attendance" as Attendance
+entity "AttendanceDetail" as AttendanceDetail
+database "Database" as DB
+
+Teacher -> UI : Chọn lớp
+UI -> Controller : loadTodaySession(classId, teacherId)
+Controller -> ClassRoom : checkTeacherAssignment(classId, teacherId)
+ClassRoom -> DB : findFirst TeachingAssignment
+DB --> ClassRoom : assignment
+ClassRoom --> Controller : valid
+
+Controller -> StudySession : findTodaySession(classId)
+StudySession -> DB : findMany StudySession
+DB --> StudySession : studySession
+StudySession --> Controller : studySession
+Controller --> UI : Hiển thị buổi học hôm nay
+
+Teacher -> UI : Mở danh sách học viên
+UI -> Controller : loadStudents(classId)
+Controller -> Student : findByClass(classId)
+Student -> DB : findMany StudentProfile by Enrollment
+DB --> Student : studentProfiles
+Student --> Controller : studentProfiles
+Controller --> UI : Hiển thị danh sách học viên
+
+Teacher -> UI : Đánh dấu trạng thái
+UI -> Controller : saveAttendance(sessionId, details)
+Controller -> Attendance : create(sessionId)
+Attendance -> DB : create Attendance
+DB --> Attendance : attendanceId
+loop Với từng học viên
+  Controller -> AttendanceDetail : create(attendanceId, studentId, status)
+  AttendanceDetail -> DB : upsert AttendanceDetail
+  DB --> AttendanceDetail : detailId
+end
+Controller --> UI : Lưu điểm danh thành công
+UI --> Teacher : Hiển thị kết quả
+@enduml

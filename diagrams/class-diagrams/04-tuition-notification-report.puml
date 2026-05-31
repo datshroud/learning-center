@@ -1,0 +1,175 @@
+@startuml
+title Class diagram - Hoc phi, thanh toan, thong bao va bao cao
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+class StudentProfile {
+  +id: String
+  +studentCode: String
+}
+
+class User {
+  +id: String
+  +fullName: String
+  +role: Role
+}
+
+class Enrollment {
+  +id: String
+  +enrollDate: DateTime
+  +status: EnrollmentStatus
+}
+
+class Course {
+  +id: String
+  +name: String
+  +tuitionFee: Decimal
+  +numberOfSessions: Int
+}
+
+class ClassRoom {
+  +id: String
+  +name: String
+}
+
+class TuitionPayment {
+  +id: String
+  +amountDue: Decimal
+  +amountPaid: Decimal
+  +dueDate: DateTime
+  +status: TuitionStatus
+  +getRemainingAmount(): Decimal
+  +canPay(amount: Decimal): Boolean
+  +applyPayment(payment: Payment): void
+}
+
+class Payment {
+  +id: String
+  +paymentDate: DateTime
+  +amount: Decimal
+  +method: PaymentMethod
+  +note: String?
+}
+
+class Invoice {
+  +id: String
+  +invoiceDate: DateTime
+  +totalAmount: Decimal
+  +generateCode(): String
+  +print(): void
+}
+
+class Notification {
+  +id: String
+  +title: String
+  +content: Text
+  +createdAt: DateTime
+  +isRead: Boolean
+  +markRead(): void
+}
+
+class DashboardReport <<dto>> {
+  +totalStudents: Int
+  +totalTeachers: Int
+  +totalClasses: Int
+  +activeClasses: Int
+  +pendingTuition: Int
+  +collectedRevenue: Decimal
+}
+
+class RevenueReport <<dto>> {
+  +totalRevenue: Decimal
+  +byMethod: Map<PaymentMethod, Decimal>
+  +byMonth: TimeSeries[]
+}
+
+class AttendanceReport <<dto>> {
+  +present: Int
+  +absent: Int
+  +late: Int
+}
+
+class LearningResultReport <<dto>> {
+  +classRoomName: String
+  +examName: String
+  +averageScore: Decimal
+}
+
+class TuitionService <<service>> {
+  +list(user: AuthUser, status?: TuitionStatus): TuitionPayment[]
+  +pay(id: String, input): TuitionPayment
+  +getInvoice(id: String): Invoice
+}
+
+class ReportsService <<service>> {
+  +dashboard(): DashboardReport
+  +revenue(): RevenueReport
+  +attendance(): AttendanceReport
+  +learningResults(): LearningResultReport[]
+  +analytics(metric: String, period: String): AnalyticsReport
+}
+
+class NotificationsService <<service>> {
+  +list(userId: String): Notification[]
+  +markRead(id: String, userId: String): Notification
+  +markAllRead(userId: String): void
+}
+
+enum TuitionStatus {
+  UNPAID
+  PARTIAL
+  PAID
+  OVERDUE
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  CARD
+}
+
+enum Role {
+  ADMIN
+  STAFF
+  TEACHER
+  STUDENT
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  CANCELLED
+  COMPLETED
+}
+
+StudentProfile "1" -- "0..*" TuitionPayment
+Enrollment "1" -- "0..1" TuitionPayment
+Course "1" -- "0..*" ClassRoom
+ClassRoom "1" -- "0..*" Enrollment
+TuitionPayment "1" -- "0..*" Payment
+TuitionPayment "1" -- "0..*" Invoice
+Payment "1" -- "0..1" Invoice
+User "1" -- "0..*" Notification
+
+Enrollment --> EnrollmentStatus
+User --> Role
+TuitionPayment --> TuitionStatus
+Payment --> PaymentMethod
+
+TuitionService ..> TuitionPayment
+TuitionService ..> Payment
+TuitionService ..> Invoice
+ReportsService ..> DashboardReport
+ReportsService ..> RevenueReport
+ReportsService ..> AttendanceReport
+ReportsService ..> LearningResultReport
+NotificationsService ..> Notification
+
+note bottom of TuitionPayment
+  Quy tac thu hoc phi:
+  amount > 0, khong thu vuot so tien con lai,
+  cap nhat UNPAID/PARTIAL/PAID,
+  tao Payment va Invoice sau khi thu.
+end note
+
+@enduml

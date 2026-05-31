@@ -1,0 +1,170 @@
+@startuml
+title Class diagram - Ghi danh, diem danh va diem so
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+class StudentProfile {
+  +id: String
+  +studentCode: String
+  +dateOfBirth: DateTime?
+  +address: String?
+  +school: String?
+  +viewLearningHistory(): Enrollment[]
+}
+
+class Parent {
+  +id: String
+  +fullName: String
+  +phone: String
+  +email: String?
+  +relationship: String
+}
+
+class ClassRoom {
+  +id: String
+  +name: String
+  +maxStudents: Int
+  +currentStudents: Int
+  +status: ClassStatus
+  +canEnroll(): Boolean
+}
+
+class Enrollment {
+  +id: String
+  +enrollDate: DateTime
+  +status: EnrollmentStatus
+  +activate(): void
+  +cancel(): void
+  +complete(): void
+}
+
+class StudySession {
+  +id: String
+  +sessionDate: DateTime
+  +topic: String?
+  +status: SessionStatus
+}
+
+class Attendance {
+  +id: String
+  +attendanceDate: DateTime
+  +createdAt: DateTime
+  +addDetail(student: StudentProfile, status: AttendanceStatus): AttendanceDetail
+}
+
+class AttendanceDetail {
+  +id: String
+  +status: AttendanceStatus
+  +note: String?
+}
+
+class TeacherProfile {
+  +id: String
+  +teacherCode: String
+}
+
+class TeachingAssignment {
+  +id: String
+  +assignedDate: DateTime
+  +role: String?
+}
+
+class Exam {
+  +id: String
+  +name: String
+  +examDate: DateTime
+  +maxScore: Decimal
+  +isValidScore(value: Decimal): Boolean
+}
+
+class Score {
+  +id: String
+  +value: Decimal
+  +comment: String?
+  +update(value: Decimal, comment?: String): void
+}
+
+class EnrollmentsService <<service>> {
+  +list(studentId?: String, classRoomId?: String): Enrollment[]
+  +create(input): Enrollment
+}
+
+class AttendanceService <<service>> {
+  +getBySession(sessionId: String): Attendance?
+  +save(user: AuthUser, input): Attendance
+}
+
+class ExamsService <<service>> {
+  +list(user: AuthUser, classRoomId?: String): Exam[]
+  +create(user: AuthUser, input): Exam
+  +createScore(user: AuthUser, input): Score
+  +updateScore(id: String, input): Score
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  CANCELLED
+  COMPLETED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+}
+
+enum ClassStatus {
+  NOT_OPENED
+  ENROLLING
+  ACTIVE
+  POSTPONED
+  FINISHED
+  CANCELLED
+}
+
+enum SessionStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+StudentProfile "1" -- "0..*" Parent
+StudentProfile "1" -- "0..*" Enrollment
+ClassRoom "1" -- "0..*" Enrollment
+ClassRoom "1" -- "0..*" StudySession
+StudySession "1" -- "0..1" Attendance
+Attendance "1" -- "1..*" AttendanceDetail
+StudentProfile "1" -- "0..*" AttendanceDetail
+TeacherProfile "1" -- "0..*" TeachingAssignment
+ClassRoom "1" -- "0..*" TeachingAssignment
+ClassRoom "1" -- "0..*" Exam
+Exam "1" -- "0..*" Score
+StudentProfile "1" -- "0..*" Score
+
+ClassRoom --> ClassStatus
+Enrollment --> EnrollmentStatus
+StudySession --> SessionStatus
+AttendanceDetail --> AttendanceStatus
+
+EnrollmentsService ..> Enrollment
+EnrollmentsService ..> ClassRoom
+AttendanceService ..> Attendance
+AttendanceService ..> TeachingAssignment
+ExamsService ..> Exam
+ExamsService ..> Score
+
+note right of Enrollment
+  Rang buoc app:
+  unique(studentId, classRoomId)
+  de chan ghi danh trung lop.
+end note
+
+note right of Score
+  Rang buoc app:
+  unique(examId, studentId)
+  va value nam trong 0..maxScore.
+end note
+
+@enduml
+

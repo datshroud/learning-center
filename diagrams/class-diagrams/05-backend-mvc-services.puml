@@ -1,0 +1,161 @@
+@startuml
+title Class diagram - Backend MVC/Service theo app Express TypeScript
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+class ExpressApp <<framework>> {
+  +use(middleware): void
+  +listen(port: Number): void
+}
+
+class AuthMiddleware <<middleware>> {
+  +authenticate(req, res, next): void
+  +authorize(...roles: Role[]): Handler
+}
+
+class ValidationMiddleware <<middleware>> {
+  +validateBody(schema: ZodSchema): Handler
+}
+
+class PrismaClient <<repository>> {
+  +user
+  +studentProfile
+  +teacherProfile
+  +classRoom
+  +enrollment
+  +attendance
+  +tuitionPayment
+  +payment
+  +invoice
+}
+
+class AuthController <<controller>> {
+  +login(req, res): void
+  +me(req, res): void
+  +logout(req, res): void
+}
+
+class UsersController <<controller>> {
+  +list(req, res): void
+  +create(req, res): void
+  +update(req, res): void
+  +updateStatus(req, res): void
+}
+
+class StudentsController <<controller>> {
+  +list(req, res): void
+  +get(req, res): void
+  +create(req, res): void
+  +update(req, res): void
+}
+
+class ClassesController <<controller>> {
+  +list(req, res): void
+  +get(req, res): void
+  +create(req, res): void
+  +update(req, res): void
+  +updateStatus(req, res): void
+  +createAssignment(req, res): void
+}
+
+class SchedulesController <<controller>> {
+  +listRooms(req, res): void
+  +createRoom(req, res): void
+  +listSchedules(req, res): void
+  +createSchedule(req, res): void
+  +updateSchedule(req, res): void
+  +listStudySessions(req, res): void
+  +createStudySession(req, res): void
+}
+
+class AttendanceController <<controller>> {
+  +getBySession(req, res): void
+  +save(req, res): void
+}
+
+class TuitionController <<controller>> {
+  +list(req, res): void
+  +pay(req, res): void
+  +getInvoice(req, res): void
+}
+
+class ExamsController <<controller>> {
+  +list(req, res): void
+  +create(req, res): void
+  +listScores(req, res): void
+  +createScore(req, res): void
+  +updateScore(req, res): void
+}
+
+class ReportsController <<controller>> {
+  +dashboard(req, res): void
+  +analytics(req, res): void
+  +revenue(req, res): void
+  +attendance(req, res): void
+  +learningResults(req, res): void
+}
+
+class AuthService <<service>>
+class UsersService <<service>>
+class StudentsService <<service>>
+class TeachersService <<service>>
+class CoursesService <<service>>
+class ClassesService <<service>>
+class SchedulesService <<service>>
+class EnrollmentsService <<service>>
+class AttendanceService <<service>>
+class TuitionService <<service>>
+class ExamsService <<service>>
+class ReportsService <<service>>
+class NotificationsService <<service>>
+
+ExpressApp --> AuthMiddleware
+ExpressApp --> ValidationMiddleware
+ExpressApp --> AuthController
+ExpressApp --> UsersController
+ExpressApp --> StudentsController
+ExpressApp --> ClassesController
+ExpressApp --> SchedulesController
+ExpressApp --> AttendanceController
+ExpressApp --> TuitionController
+ExpressApp --> ExamsController
+ExpressApp --> ReportsController
+
+AuthController --> AuthService
+UsersController --> UsersService
+StudentsController --> StudentsService
+ClassesController --> ClassesService
+SchedulesController --> SchedulesService
+AttendanceController --> AttendanceService
+TuitionController --> TuitionService
+ExamsController --> ExamsService
+ReportsController --> ReportsService
+
+AuthService --> PrismaClient
+UsersService --> PrismaClient
+StudentsService --> PrismaClient
+TeachersService --> PrismaClient
+CoursesService --> PrismaClient
+ClassesService --> PrismaClient
+SchedulesService --> PrismaClient
+EnrollmentsService --> PrismaClient
+AttendanceService --> PrismaClient
+TuitionService --> PrismaClient
+ExamsService --> PrismaClient
+ReportsService --> PrismaClient
+NotificationsService --> PrismaClient
+
+note bottom of ClassesService
+  Xu ly nghiep vu:
+  tao/sua lop, cap nhat trang thai,
+  gan giao vien, gan nhieu phong hoc cho lop.
+end note
+
+note bottom of SchedulesService
+  Xu ly xung dot:
+  trung phong hoc va trung lich giao vien.
+end note
+
+@enduml
+

@@ -1,0 +1,18 @@
+@startuml
+start
+:Giáo viên đăng nhập;
+:Chọn lớp học;
+:Chọn buổi học;
+
+if (Có quyền điểm danh lớp?) then (Có)
+  :Hệ thống hiển thị danh sách học viên;
+  :Giáo viên đánh dấu trạng thái từng học viên;
+  :Lưu điểm danh;
+  :Thông báo thành công;
+  stop
+else (Không)
+  :Thông báo không có quyền điểm danh;
+  stop
+endif
+@enduml
+

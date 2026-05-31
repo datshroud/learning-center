@@ -1,0 +1,134 @@
+@startuml
+title Class diagram - Nguoi dung, phan quyen va ho so
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+abstract class UserAccount {
+  +id: String
+  +fullName: String
+  +phone: String?
+  +email: String?
+  +username: String
+  -password: String
+  +status: UserStatus
+  +login(username: String, password: String): AuthToken
+  +logout(): void
+  +getPermissions(): Permission[]
+}
+
+class Admin {
+  +manageUsers(): void
+  +manageCourses(): void
+  +viewReports(): Report[]
+}
+
+class Staff {
+  +staffCode: String
+  +position: String?
+  +manageStudents(): void
+  +enrollStudent(): Enrollment
+  +collectTuition(): Invoice
+}
+
+class Teacher {
+  +teacherCode: String
+  +specialization: String?
+  +qualification: String?
+  +viewAssignedClasses(): ClassRoom[]
+  +takeAttendance(): Attendance
+  +enterScore(): Score
+}
+
+class Student {
+  +studentCode: String
+  +dateOfBirth: DateTime?
+  +address: String?
+  +school: String?
+  +viewSchedule(): Schedule[]
+  +viewScores(): Score[]
+  +viewTuitionStatus(): TuitionPayment[]
+}
+
+class User {
+  +id: String
+  +fullName: String
+  +username: String
+  +role: Role
+  +status: UserStatus
+}
+
+class StudentProfile {
+  +studentCode: String
+  +dateOfBirth: DateTime?
+  +address: String?
+  +school: String?
+}
+
+class TeacherProfile {
+  +teacherCode: String
+  +specialization: String?
+  +qualification: String?
+}
+
+class StaffProfile {
+  +staffCode: String
+  +position: String?
+}
+
+class Parent {
+  +fullName: String
+  +phone: String
+  +email: String?
+  +relationship: String
+}
+
+class Notification {
+  +title: String
+  +content: Text
+  +isRead: Boolean
+  +markRead(): void
+}
+
+class AuthToken {
+  +accessToken: String
+  +expiresIn: String
+}
+
+enum Role {
+  ADMIN
+  STAFF
+  TEACHER
+  STUDENT
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  LOCKED
+}
+
+UserAccount <|-- Admin
+UserAccount <|-- Staff
+UserAccount <|-- Teacher
+UserAccount <|-- Student
+
+User "1" -- "0..1" StudentProfile
+User "1" -- "0..1" TeacherProfile
+User "1" -- "0..1" StaffProfile
+User "1" -- "0..*" Notification
+StudentProfile "1" -- "0..*" Parent
+
+User --> Role
+User --> UserStatus
+UserAccount ..> AuthToken
+
+note right of User
+  Trong code hien tai, ke thua OOP duoc hien thuc
+  bang User.role + cac profile rieng cho tung vai tro.
+  So do nay giu ca goc nhin OOP trong bao cao
+  va goc nhin persistence cua Prisma.
+end note
+
+@enduml
+

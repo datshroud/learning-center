@@ -1,0 +1,52 @@
+@startuml
+actor "Nhân viên" as Staff
+boundary "TuitionUI" as UI
+control "TuitionController" as Controller
+entity "StudentProfile" as Student
+entity "TuitionPayment" as TuitionPayment
+entity "Invoice" as Invoice
+entity "Payment" as Payment
+database "Database" as DB
+
+Staff -> UI : Tìm học viên
+UI -> Controller : searchStudent(keyword)
+Controller -> Student : findByKeyword(keyword)
+Student -> DB : findMany StudentProfile
+DB --> Student : studentProfile
+Student --> Controller : studentProfile
+
+Controller -> TuitionPayment : findUnpaidByStudent(studentId)
+TuitionPayment -> DB : findMany TuitionPayment
+DB --> TuitionPayment : unpaidPayments
+TuitionPayment --> Controller : unpaidPayments
+Controller --> UI : Hiển thị khoản học phí cần đóng
+
+Staff -> UI : Chọn khoản và nhập thanh toán
+UI -> Controller : pay(tuitionId, amount, method)
+Controller -> TuitionPayment : findById(tuitionId)
+TuitionPayment -> DB : findUnique TuitionPayment
+DB --> TuitionPayment : tuitionPayment
+TuitionPayment --> Controller : tuitionPayment
+
+alt Số tiền hợp lệ
+  Controller -> Payment : create(amount, method)
+  Payment -> DB : create Payment
+  DB --> Payment : paymentId
+  Payment --> Controller : payment
+
+  Controller -> TuitionPayment : pay(amount)
+  TuitionPayment -> DB : update TuitionPayment
+  DB --> TuitionPayment : updated
+
+  Controller -> Invoice : create(tuitionPayment, payment)
+  Invoice -> DB : create Invoice
+  DB --> Invoice : invoiceId
+  Invoice --> Controller : invoice
+
+  Controller --> UI : Thanh toán thành công
+else Số tiền không hợp lệ
+  Controller --> UI : Yêu cầu nhập lại số tiền
+end
+
+UI --> Staff : Hiển thị hóa đơn
+@enduml

@@ -1,0 +1,271 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String          @id @default(cuid()) @db.NVarChar(191)
+  fullName       String          @db.NVarChar(191)
+  phone          String?         @db.NVarChar(191)
+  email          String?         @unique @db.NVarChar(191)
+  username       String          @unique @db.NVarChar(191)
+  password       String          @db.NVarChar(191)
+  role           String          @db.NVarChar(20)
+  status         String          @default("ACTIVE") @db.NVarChar(20)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  studentProfile StudentProfile?
+  teacherProfile TeacherProfile?
+  staffProfile   StaffProfile?
+  notifications  Notification[]
+  attendances    Attendance[]    @relation("TeacherAttendances")
+}
+
+model StudentProfile {
+  id                String             @id @default(cuid()) @db.NVarChar(191)
+  userId            String             @unique @db.NVarChar(191)
+  studentCode       String             @unique @db.NVarChar(191)
+  customerRole      String             @default("STUDENT") @db.NVarChar(20)
+  dateOfBirth       DateTime?
+  address           String?            @db.NVarChar(191)
+  school            String?            @db.NVarChar(191)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parents           Parent[]
+  enrollments       Enrollment[]
+  attendanceDetails AttendanceDetail[]
+  scores            Score[]
+  tuitionPayments   TuitionPayment[]
+}
+
+model TeacherProfile {
+  id          String               @id @default(cuid()) @db.NVarChar(191)
+  userId      String               @unique @db.NVarChar(191)
+  teacherCode String               @unique @db.NVarChar(191)
+  specialization String?           @db.NVarChar(191)
+  qualification  String?           @db.NVarChar(191)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  user        User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignments TeachingAssignment[]
+}
+
+model StaffProfile {
+  id        String   @id @default(cuid()) @db.NVarChar(191)
+  userId    String   @unique @db.NVarChar(191)
+  staffCode String   @unique @db.NVarChar(191)
+  position  String?  @db.NVarChar(191)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Parent {
+  id           String         @id @default(cuid()) @db.NVarChar(191)
+  studentId    String         @db.NVarChar(191)
+  fullName     String         @db.NVarChar(191)
+  phone        String         @db.NVarChar(191)
+  email        String?        @db.NVarChar(191)
+  relationship String         @db.NVarChar(191)
+  student      StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model Subject {
+  id          String   @id @default(cuid()) @db.NVarChar(191)
+  name        String   @unique @db.NVarChar(191)
+  description String?  @db.NVarChar(191)
+  courses     Course[]
+}
+
+model Course {
+  id               String      @id @default(cuid()) @db.NVarChar(191)
+  subjectId        String      @db.NVarChar(191)
+  name             String      @db.NVarChar(191)
+  grade            Int
+  tuitionFee       Decimal     @db.Decimal(12, 2)
+  numberOfSessions Int
+  startDate        DateTime?
+  endDate          DateTime?
+  subject          Subject     @relation(fields: [subjectId], references: [id])
+  classes          ClassRoom[]
+}
+
+model ClassRoom {
+  id                 String               @id @default(cuid()) @db.NVarChar(191)
+  courseId           String               @db.NVarChar(191)
+  name               String               @db.NVarChar(191)
+  maxStudents        Int
+  currentStudents    Int                  @default(0)
+  status             String               @default("NOT_OPENED") @db.NVarChar(20)
+  note               String?              @db.NVarChar(191)
+  course             Course               @relation(fields: [courseId], references: [id])
+  schedules          Schedule[]
+  studySessions      StudySession[]
+  enrollments        Enrollment[]
+  teachingAssignments TeachingAssignment[]
+  exams              Exam[]
+  roomAssignments    ClassRoomRoom[]
+}
+
+model Room {
+  id               String          @id @default(cuid()) @db.NVarChar(191)
+  name             String          @unique @db.NVarChar(191)
+  capacity         Int
+  location         String?         @db.NVarChar(191)
+  schedules        Schedule[]
+  classAssignments ClassRoomRoom[]
+}
+
+model ClassRoomRoom {
+  classRoomId String @db.NVarChar(191)
+  roomId      String @db.NVarChar(191)
+  assignedAt  DateTime @default(now())
+  classRoom   ClassRoom @relation(fields: [classRoomId], references: [id], onDelete: Cascade)
+  room        Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@id([classRoomId, roomId])
+  @@index([roomId])
+}
+
+model Schedule {
+  id          String    @id @default(cuid()) @db.NVarChar(191)
+  classRoomId String    @db.NVarChar(191)
+  roomId      String    @db.NVarChar(191)
+  dayOfWeek   Int
+  startTime   String    @db.NVarChar(191)
+  endTime     String    @db.NVarChar(191)
+  classRoom   ClassRoom @relation(fields: [classRoomId], references: [id], onDelete: Cascade)
+  room        Room      @relation(fields: [roomId], references: [id])
+}
+
+model StudySession {
+  id          String        @id @default(cuid()) @db.NVarChar(191)
+  classRoomId String        @db.NVarChar(191)
+  sessionDate DateTime
+  topic       String?       @db.NVarChar(191)
+  status      String        @default("SCHEDULED") @db.NVarChar(20)
+  classRoom   ClassRoom     @relation(fields: [classRoomId], references: [id], onDelete: Cascade)
+  attendance  Attendance?
+}
+
+model Enrollment {
+  id            String           @id @default(cuid()) @db.NVarChar(191)
+  studentId     String           @db.NVarChar(191)
+  classRoomId   String           @db.NVarChar(191)
+  enrollDate    DateTime         @default(now())
+  status        String           @default("ACTIVE") @db.NVarChar(20)
+  student       StudentProfile   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  classRoom     ClassRoom        @relation(fields: [classRoomId], references: [id], onDelete: Cascade)
+  tuitionPayment TuitionPayment?
+
+  @@unique([studentId, classRoomId])
+}
+
+model TeachingAssignment {
+  id            String         @id @default(cuid()) @db.NVarChar(191)
+  teacherId     String         @db.NVarChar(191)
+  classRoomId   String         @db.NVarChar(191)
+  assignedDate  DateTime       @default(now())
+  role          String?        @db.NVarChar(191)
+  teacher       TeacherProfile @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  classRoom     ClassRoom      @relation(fields: [classRoomId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, classRoomId])
+}
+
+model Attendance {
+  id             String             @id @default(cuid()) @db.NVarChar(191)
+  studySessionId String             @unique @db.NVarChar(191)
+  teacherUserId  String             @db.NVarChar(191)
+  attendanceDate DateTime           @default(now())
+  createdAt      DateTime           @default(now())
+  studySession   StudySession       @relation(fields: [studySessionId], references: [id], onDelete: Cascade)
+  teacher        User               @relation("TeacherAttendances", fields: [teacherUserId], references: [id])
+  details        AttendanceDetail[]
+}
+
+model AttendanceDetail {
+  id           String           @id @default(cuid()) @db.NVarChar(191)
+  attendanceId String           @db.NVarChar(191)
+  studentId    String           @db.NVarChar(191)
+  status       String           @db.NVarChar(20)
+  note         String?          @db.NVarChar(191)
+  attendance   Attendance       @relation(fields: [attendanceId], references: [id], onDelete: Cascade)
+  student      StudentProfile   @relation(fields: [studentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([attendanceId, studentId])
+}
+
+model Exam {
+  id          String    @id @default(cuid()) @db.NVarChar(191)
+  classRoomId String    @db.NVarChar(191)
+  name        String    @db.NVarChar(191)
+  examDate    DateTime
+  maxScore    Decimal   @db.Decimal(5, 2)
+  classRoom   ClassRoom @relation(fields: [classRoomId], references: [id], onDelete: Cascade)
+  scores      Score[]
+}
+
+model Score {
+  id        String         @id @default(cuid()) @db.NVarChar(191)
+  examId    String         @db.NVarChar(191)
+  studentId String         @db.NVarChar(191)
+  value     Decimal        @db.Decimal(5, 2)
+  comment   String?        @db.NVarChar(191)
+  exam      Exam           @relation(fields: [examId], references: [id], onDelete: Cascade)
+  student   StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([examId, studentId])
+}
+
+model TuitionPayment {
+  id            String         @id @default(cuid()) @db.NVarChar(191)
+  studentId     String         @db.NVarChar(191)
+  enrollmentId  String?        @unique @db.NVarChar(191)
+  amountDue     Decimal        @db.Decimal(12, 2)
+  amountPaid    Decimal        @default(0) @db.Decimal(12, 2)
+  dueDate       DateTime
+  status        String         @default("UNPAID") @db.NVarChar(20)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  student       StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  enrollment    Enrollment?    @relation(fields: [enrollmentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  payments      Payment[]
+  invoices      Invoice[]
+}
+
+model Payment {
+  id               String          @id @default(cuid()) @db.NVarChar(191)
+  tuitionPaymentId String          @db.NVarChar(191)
+  paymentDate      DateTime        @default(now())
+  amount           Decimal         @db.Decimal(12, 2)
+  method           String          @db.NVarChar(20)
+  note             String?         @db.NVarChar(191)
+  tuitionPayment   TuitionPayment  @relation(fields: [tuitionPaymentId], references: [id], onDelete: Cascade)
+  invoice          Invoice?
+}
+
+model Invoice {
+  id               String         @id @default(cuid()) @db.NVarChar(191)
+  tuitionPaymentId String         @db.NVarChar(191)
+  paymentId        String         @unique @db.NVarChar(191)
+  invoiceDate      DateTime       @default(now())
+  totalAmount      Decimal        @db.Decimal(12, 2)
+  tuitionPayment   TuitionPayment @relation(fields: [tuitionPaymentId], references: [id], onDelete: Cascade)
+  payment          Payment        @relation(fields: [paymentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model Notification {
+  id        String   @id @default(cuid()) @db.NVarChar(191)
+  userId    String   @db.NVarChar(191)
+  title     String   @db.NVarChar(191)
+  content   String   @db.NVarChar(Max)
+  createdAt DateTime @default(now())
+  isRead    Boolean  @default(false)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

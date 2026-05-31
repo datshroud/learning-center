@@ -1,0 +1,49 @@
+@startuml
+actor "Nhân viên" as Staff
+boundary "EnrollmentUI" as UI
+control "EnrollmentController" as Controller
+entity "StudentProfile" as Student
+entity "ClassRoom" as ClassRoom
+entity "Enrollment" as Enrollment
+entity "TuitionPayment" as TuitionPayment
+database "Database" as DB
+
+Staff -> UI : Tìm học viên
+UI -> Controller : searchStudent(keyword)
+Controller -> Student : findByKeyword(keyword)
+Student -> DB : findMany StudentProfile
+DB --> Student : studentProfile
+Student --> Controller : studentProfile
+Controller --> UI : Hiển thị thông tin học viên
+
+Staff -> UI : Chọn lớp cần đăng ký
+UI -> Controller : enroll(studentId, classId)
+Controller -> ClassRoom : findById(classId)
+ClassRoom -> DB : findUnique ClassRoom
+DB --> ClassRoom : classRoom
+ClassRoom --> Controller : classRoom
+
+Controller -> ClassRoom : canEnroll()
+alt Lớp còn chỗ
+  Controller -> Enrollment : exists(studentId, classId)
+  Enrollment -> DB : findUnique Enrollment
+  DB --> Enrollment : result
+  alt Chưa đăng ký lớp
+    Controller -> Enrollment : create(student, classRoom)
+    Enrollment -> DB : create Enrollment
+    DB --> Enrollment : enrollmentId
+    Enrollment --> Controller : enrollment
+    Controller -> TuitionPayment : createPending(enrollment)
+    TuitionPayment -> DB : create TuitionPayment
+    DB --> TuitionPayment : tuitionPaymentId
+    TuitionPayment --> Controller : tuitionPayment
+    Controller --> UI : Ghi danh thành công
+  else Đã đăng ký lớp
+    Controller --> UI : Thông báo trùng ghi danh
+  end
+else Lớp đã đầy
+  Controller --> UI : Thông báo lớp đã đầy
+end
+
+UI --> Staff : Hiển thị kết quả
+@enduml

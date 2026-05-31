@@ -1,0 +1,12 @@
+@startuml
+[*] --> "Chưa thanh toán"
+"Chưa thanh toán" --> "Thanh toán một phần" : thu một phần
+"Thanh toán một phần" --> "Đã thanh toán" : thu đủ
+"Chưa thanh toán" --> "Đã thanh toán" : thu đủ một lần
+"Chưa thanh toán" --> "Quá hạn" : quá hạn đóng
+"Thanh toán một phần" --> "Quá hạn" : quá hạn phần còn lại
+"Quá hạn" --> "Thanh toán một phần" : thu một phần
+"Quá hạn" --> "Đã thanh toán" : thu đủ
+"Đã thanh toán" --> [*]
+@enduml
+

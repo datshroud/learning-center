@@ -1,0 +1,288 @@
+@startuml
+title Tong quan class diagram - He thong quan ly trung tam hoc them
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+hide empty methods
+
+package "Tai khoan va ho so" {
+  class User {
+    +id: String
+    +fullName: String
+    +phone: String?
+    +email: String?
+    +username: String
+    -password: String
+    +role: Role
+    +status: UserStatus
+    +createdAt: DateTime
+    +updatedAt: DateTime
+  }
+
+  class StudentProfile {
+    +id: String
+    +studentCode: String
+    +dateOfBirth: DateTime?
+    +address: String?
+    +school: String?
+  }
+
+  class TeacherProfile {
+    +id: String
+    +teacherCode: String
+    +specialization: String?
+    +qualification: String?
+  }
+
+  class StaffProfile {
+    +id: String
+    +staffCode: String
+    +position: String?
+  }
+
+  class Parent {
+    +id: String
+    +fullName: String
+    +phone: String
+    +email: String?
+    +relationship: String
+  }
+}
+
+package "Dao tao" {
+  class Subject {
+    +id: String
+    +name: String
+    +description: String?
+  }
+
+  class Course {
+    +id: String
+    +name: String
+    +grade: Int
+    +tuitionFee: Decimal
+    +numberOfSessions: Int
+    +startDate: DateTime?
+    +endDate: DateTime?
+  }
+
+  class ClassRoom {
+    +id: String
+    +name: String
+    +maxStudents: Int
+    +currentStudents: Int
+    +status: ClassStatus
+    +note: String?
+    +canEnroll(): Boolean
+    +updateStatus(status: ClassStatus): void
+  }
+
+  class Room {
+    +id: String
+    +name: String
+    +capacity: Int
+    +location: String?
+  }
+
+  class ClassRoomRoom {
+    +classRoomId: String
+    +roomId: String
+    +assignedAt: DateTime
+  }
+
+  class Schedule {
+    +id: String
+    +dayOfWeek: Int
+    +startTime: String
+    +endTime: String
+    +overlaps(other: Schedule): Boolean
+  }
+
+  class StudySession {
+    +id: String
+    +sessionDate: DateTime
+    +topic: String?
+    +status: SessionStatus
+  }
+}
+
+package "Nghiep vu lop hoc" {
+  class Enrollment {
+    +id: String
+    +enrollDate: DateTime
+    +status: EnrollmentStatus
+    +cancel(): void
+  }
+
+  class TeachingAssignment {
+    +id: String
+    +assignedDate: DateTime
+    +role: String?
+  }
+
+  class Attendance {
+    +id: String
+    +attendanceDate: DateTime
+    +createdAt: DateTime
+  }
+
+  class AttendanceDetail {
+    +id: String
+    +status: AttendanceStatus
+    +note: String?
+  }
+
+  class Exam {
+    +id: String
+    +name: String
+    +examDate: DateTime
+    +maxScore: Decimal
+  }
+
+  class Score {
+    +id: String
+    +value: Decimal
+    +comment: String?
+  }
+}
+
+package "Tai chinh va thong bao" {
+  class TuitionPayment {
+    +id: String
+    +amountDue: Decimal
+    +amountPaid: Decimal
+    +dueDate: DateTime
+    +status: TuitionStatus
+    +getRemainingAmount(): Decimal
+    +pay(amount: Decimal): void
+  }
+
+  class Payment {
+    +id: String
+    +paymentDate: DateTime
+    +amount: Decimal
+    +method: PaymentMethod
+    +note: String?
+  }
+
+  class Invoice {
+    +id: String
+    +invoiceDate: DateTime
+    +totalAmount: Decimal
+    +print(): void
+  }
+
+  class Notification {
+    +id: String
+    +title: String
+    +content: Text
+    +createdAt: DateTime
+    +isRead: Boolean
+    +markRead(): void
+  }
+}
+
+enum Role {
+  ADMIN
+  STAFF
+  TEACHER
+  STUDENT
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  LOCKED
+}
+
+enum ClassStatus {
+  NOT_OPENED
+  ENROLLING
+  ACTIVE
+  POSTPONED
+  FINISHED
+  CANCELLED
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  CANCELLED
+  COMPLETED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+}
+
+enum TuitionStatus {
+  UNPAID
+  PARTIAL
+  PAID
+  OVERDUE
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  CARD
+}
+
+enum SessionStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+User "1" -- "0..1" StudentProfile
+User "1" -- "0..1" TeacherProfile
+User "1" -- "0..1" StaffProfile
+User "1" -- "0..*" Notification
+StudentProfile "1" -- "0..*" Parent
+
+Subject "1" -- "0..*" Course
+Course "1" -- "0..*" ClassRoom
+ClassRoom "1" -- "0..*" ClassRoomRoom
+Room "1" -- "0..*" ClassRoomRoom
+ClassRoom "1" -- "0..*" Schedule
+Room "1" -- "0..*" Schedule
+ClassRoom "1" -- "0..*" StudySession
+
+StudentProfile "1" -- "0..*" Enrollment
+ClassRoom "1" -- "0..*" Enrollment
+TeacherProfile "1" -- "0..*" TeachingAssignment
+ClassRoom "1" -- "0..*" TeachingAssignment
+
+StudySession "1" -- "0..1" Attendance
+User "1" -- "0..*" Attendance : teacher
+Attendance "1" -- "1..*" AttendanceDetail
+StudentProfile "1" -- "0..*" AttendanceDetail
+
+ClassRoom "1" -- "0..*" Exam
+Exam "1" -- "0..*" Score
+StudentProfile "1" -- "0..*" Score
+
+StudentProfile "1" -- "0..*" TuitionPayment
+Enrollment "1" -- "0..1" TuitionPayment
+TuitionPayment "1" -- "0..*" Payment
+TuitionPayment "1" -- "0..*" Invoice
+Payment "1" -- "0..1" Invoice
+
+User --> Role
+User --> UserStatus
+ClassRoom --> ClassStatus
+Enrollment --> EnrollmentStatus
+StudySession --> SessionStatus
+AttendanceDetail --> AttendanceStatus
+TuitionPayment --> TuitionStatus
+Payment --> PaymentMethod
+
+note right of ClassRoomRoom
+  Quan he moi trong app:
+  mot lop co the duoc gan nhieu phong,
+  mot phong co the phuc vu nhieu lop.
+end note
+
+@enduml
+

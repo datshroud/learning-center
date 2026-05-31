@@ -1,0 +1,265 @@
+@startuml
+title ERD - He thong quan ly trung tam hoc them
+
+hide circle
+skinparam linetype ortho
+
+entity "User" as User {
+  * id : String <<PK>>
+  --
+  fullName : String
+  phone : String?
+  email : String? <<unique>>
+  username : String <<unique>>
+  password : String
+  role : String
+  status : String
+  createdAt : DateTime
+  updatedAt : DateTime
+}
+
+entity "StudentProfile" as StudentProfile {
+  * id : String <<PK>>
+  --
+  userId : String <<FK, unique>>
+  studentCode : String <<unique>>
+  customerRole : String
+  dateOfBirth : DateTime?
+  address : String?
+  school : String?
+}
+
+entity "TeacherProfile" as TeacherProfile {
+  * id : String <<PK>>
+  --
+  userId : String <<FK, unique>>
+  teacherCode : String <<unique>>
+  specialization : String?
+  qualification : String?
+}
+
+entity "StaffProfile" as StaffProfile {
+  * id : String <<PK>>
+  --
+  userId : String <<FK, unique>>
+  staffCode : String <<unique>>
+  position : String?
+}
+
+entity "Parent" as Parent {
+  * id : String <<PK>>
+  --
+  studentId : String <<FK>>
+  fullName : String
+  phone : String
+  email : String?
+  relationship : String
+}
+
+entity "Subject" as Subject {
+  * id : String <<PK>>
+  --
+  name : String <<unique>>
+  description : String?
+}
+
+entity "Course" as Course {
+  * id : String <<PK>>
+  --
+  subjectId : String <<FK>>
+  name : String
+  grade : Int
+  tuitionFee : Decimal
+  numberOfSessions : Int
+  startDate : DateTime?
+  endDate : DateTime?
+}
+
+entity "ClassRoom" as ClassRoom {
+  * id : String <<PK>>
+  --
+  courseId : String <<FK>>
+  name : String
+  maxStudents : Int
+  currentStudents : Int
+  status : String
+  note : String?
+}
+
+entity "Room" as Room {
+  * id : String <<PK>>
+  --
+  name : String <<unique>>
+  capacity : Int
+  location : String?
+}
+
+entity "ClassRoomRoom" as ClassRoomRoom {
+  * classRoomId : String <<PK, FK>>
+  * roomId : String <<PK, FK>>
+  --
+  assignedAt : DateTime
+}
+
+entity "Schedule" as Schedule {
+  * id : String <<PK>>
+  --
+  classRoomId : String <<FK>>
+  roomId : String <<FK>>
+  dayOfWeek : Int
+  startTime : String
+  endTime : String
+}
+
+entity "StudySession" as StudySession {
+  * id : String <<PK>>
+  --
+  classRoomId : String <<FK>>
+  sessionDate : DateTime
+  topic : String?
+  status : String
+}
+
+entity "Enrollment" as Enrollment {
+  * id : String <<PK>>
+  --
+  studentId : String <<FK>>
+  classRoomId : String <<FK>>
+  enrollDate : DateTime
+  status : String
+  --
+  studentId + classRoomId <<unique>>
+}
+
+entity "TeachingAssignment" as TeachingAssignment {
+  * id : String <<PK>>
+  --
+  teacherId : String <<FK>>
+  classRoomId : String <<FK>>
+  assignedDate : DateTime
+  role : String?
+  --
+  teacherId + classRoomId <<unique>>
+}
+
+entity "Attendance" as Attendance {
+  * id : String <<PK>>
+  --
+  studySessionId : String <<FK, unique>>
+  teacherUserId : String <<FK>>
+  attendanceDate : DateTime
+  createdAt : DateTime
+}
+
+entity "AttendanceDetail" as AttendanceDetail {
+  * id : String <<PK>>
+  --
+  attendanceId : String <<FK>>
+  studentId : String <<FK>>
+  status : String
+  note : String?
+  --
+  attendanceId + studentId <<unique>>
+}
+
+entity "Exam" as Exam {
+  * id : String <<PK>>
+  --
+  classRoomId : String <<FK>>
+  name : String
+  examDate : DateTime
+  maxScore : Decimal
+}
+
+entity "Score" as Score {
+  * id : String <<PK>>
+  --
+  examId : String <<FK>>
+  studentId : String <<FK>>
+  value : Decimal
+  comment : String?
+  --
+  examId + studentId <<unique>>
+}
+
+entity "TuitionPayment" as TuitionPayment {
+  * id : String <<PK>>
+  --
+  studentId : String <<FK>>
+  enrollmentId : String? <<FK, unique>>
+  amountDue : Decimal
+  amountPaid : Decimal
+  dueDate : DateTime
+  status : String
+  createdAt : DateTime
+  updatedAt : DateTime
+}
+
+entity "Payment" as Payment {
+  * id : String <<PK>>
+  --
+  tuitionPaymentId : String <<FK>>
+  paymentDate : DateTime
+  amount : Decimal
+  method : String
+  note : String?
+}
+
+entity "Invoice" as Invoice {
+  * id : String <<PK>>
+  --
+  tuitionPaymentId : String <<FK>>
+  paymentId : String <<FK, unique>>
+  invoiceDate : DateTime
+  totalAmount : Decimal
+}
+
+entity "Notification" as Notification {
+  * id : String <<PK>>
+  --
+  userId : String <<FK>>
+  title : String
+  content : String
+  createdAt : DateTime
+  isRead : Boolean
+}
+
+User ||--o| StudentProfile
+User ||--o| TeacherProfile
+User ||--o| StaffProfile
+User ||--o{ Notification
+User ||--o{ Attendance : teacher
+
+StudentProfile ||--o{ Parent
+StudentProfile ||--o{ Enrollment
+StudentProfile ||--o{ AttendanceDetail
+StudentProfile ||--o{ Score
+StudentProfile ||--o{ TuitionPayment
+
+TeacherProfile ||--o{ TeachingAssignment
+
+Subject ||--o{ Course
+Course ||--o{ ClassRoom
+ClassRoom ||--o{ ClassRoomRoom
+Room ||--o{ ClassRoomRoom
+ClassRoom ||--o{ Schedule
+Room ||--o{ Schedule
+ClassRoom ||--o{ StudySession
+ClassRoom ||--o{ Enrollment
+ClassRoom ||--o{ TeachingAssignment
+ClassRoom ||--o{ Exam
+
+StudySession ||--o| Attendance
+Attendance ||--o{ AttendanceDetail
+Exam ||--o{ Score
+Enrollment ||--o| TuitionPayment
+TuitionPayment ||--o{ Payment
+TuitionPayment ||--o{ Invoice
+Payment ||--o| Invoice
+
+legend bottom
+  Source: backend/prisma/schema.prisma
+  Ten entity va field dung theo Prisma model hien tai.
+endlegend
+
+@enduml

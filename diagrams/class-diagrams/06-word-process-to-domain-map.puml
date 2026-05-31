@@ -1,0 +1,125 @@
+@startuml
+title Anh xa tien trinh trong bao cao Word sang class/service cua app
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+package "Tien trinh nghiep vu trong PTTKHDT.docx" {
+  class StudentRegistrationProcess <<process>> {
+    +tiepnNhanHoSo(): void
+    +capNhatHocVien(): void
+    +tuVanKhoaHoc(): void
+  }
+
+  class ClassPlacementProcess <<process>> {
+    +taoLop(): void
+    +xepHocVienVaoLop(): void
+    +phanCongGiaoVien(): void
+  }
+
+  class ScheduleManagementProcess <<process>> {
+    +sapXepLichHoc(): void
+    +ganPhongHoc(): void
+    +kiemTraTrungLich(): void
+  }
+
+  class AttendanceProcess <<process>> {
+    +chonBuoiHoc(): void
+    +diemDanhHocVien(): void
+    +thongKeChuyenCan(): void
+  }
+
+  class TuitionProcess <<process>> {
+    +taoKhoanHocPhi(): void
+    +ghiNhanThanhToan(): void
+    +lapHoaDon(): void
+  }
+
+  class ReportingProcess <<process>> {
+    +thongKeHocVien(): void
+    +thongKeDoanhThu(): void
+    +thongKeKetQuaHocTap(): void
+  }
+}
+
+package "Service trong backend" {
+  class StudentsService <<service>>
+  class CoursesService <<service>>
+  class ClassesService <<service>>
+  class EnrollmentsService <<service>>
+  class SchedulesService <<service>>
+  class AttendanceService <<service>>
+  class TuitionService <<service>>
+  class ExamsService <<service>>
+  class ReportsService <<service>>
+  class NotificationsService <<service>>
+}
+
+package "Domain class chinh" {
+  class User
+  class StudentProfile
+  class Parent
+  class Subject
+  class Course
+  class ClassRoom
+  class Room
+  class Schedule
+  class StudySession
+  class Enrollment
+  class TeachingAssignment
+  class Attendance
+  class AttendanceDetail
+  class Exam
+  class Score
+  class TuitionPayment
+  class Payment
+  class Invoice
+  class Notification
+}
+
+StudentRegistrationProcess ..> StudentsService
+StudentRegistrationProcess ..> StudentProfile
+StudentRegistrationProcess ..> Parent
+StudentRegistrationProcess ..> Course
+
+ClassPlacementProcess ..> ClassesService
+ClassPlacementProcess ..> EnrollmentsService
+ClassPlacementProcess ..> ClassRoom
+ClassPlacementProcess ..> Enrollment
+ClassPlacementProcess ..> TeachingAssignment
+
+ScheduleManagementProcess ..> SchedulesService
+ScheduleManagementProcess ..> Schedule
+ScheduleManagementProcess ..> StudySession
+ScheduleManagementProcess ..> Room
+
+AttendanceProcess ..> AttendanceService
+AttendanceProcess ..> Attendance
+AttendanceProcess ..> AttendanceDetail
+AttendanceProcess ..> StudySession
+
+TuitionProcess ..> TuitionService
+TuitionProcess ..> TuitionPayment
+TuitionProcess ..> Payment
+TuitionProcess ..> Invoice
+
+ReportingProcess ..> ReportsService
+ReportingProcess ..> ExamsService
+ReportingProcess ..> Notification
+ReportingProcess ..> Score
+
+CoursesService ..> Subject
+CoursesService ..> Course
+NotificationsService ..> Notification
+
+note right of StudentRegistrationProcess
+  Trong Word co cac quy trinh:
+  tiep nhan ho so, tao lop/xep lop,
+  lich hoc/phong hoc, diem danh,
+  thu hoc phi va thong ke.
+  So do nay anh xa cac quy trinh do
+  sang class/service dang co trong app.
+end note
+
+@enduml
+

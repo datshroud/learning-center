@@ -1,0 +1,25 @@
+@startuml
+start
+:Nhân viên đăng nhập;
+:Tìm kiếm học viên;
+:Chọn khóa học;
+:Chọn lớp học;
+:Kiểm tra sĩ số lớp;
+
+if (Lớp còn chỗ?) then (Có)
+  :Kiểm tra học viên đã đăng ký lớp chưa;
+  if (Đã đăng ký?) then (Có)
+    :Thông báo học viên đã đăng ký lớp;
+    stop
+  else (Không)
+    :Tạo bản ghi ghi danh;
+    :Tạo khoản học phí;
+    :Thông báo ghi danh thành công;
+    stop
+  endif
+else (Không)
+  :Thông báo không thể ghi danh;
+  stop
+endif
+@enduml
+

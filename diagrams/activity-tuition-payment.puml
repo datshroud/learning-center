@@ -1,0 +1,22 @@
+@startuml
+start
+:Nhân viên đăng nhập;
+:Tìm học viên;
+:Xem danh sách khoản học phí;
+:Chọn khoản cần thanh toán;
+:Nhập số tiền;
+:Chọn phương thức thanh toán;
+
+if (Số tiền hợp lệ?) then (Có)
+  :Tạo thanh toán;
+  :Tạo phiếu thu;
+  :Cập nhật trạng thái thanh toán;
+  :Hiển thị hóa đơn;
+  stop
+else (Không)
+  :Thông báo số tiền không hợp lệ;
+  :Yêu cầu nhập lại;
+  stop
+endif
+@enduml
+
